@@ -42,6 +42,7 @@ The two states Cat 0 and Cat 1 form orthonormal (orthogonal to each other with a
 
 4. **Other Quantum Gates for Basic Tasks**:
    - **Pauli-X Gate (NOT Gate)**: Flips the state of a qubit (|0⟩ to |1⟩ and |1⟩ to |0⟩).
+   This is similar to the NOT gate in classical computers.
      \[
      X = \begin{pmatrix}
      0 & 1 \\
@@ -78,3 +79,49 @@ The two states Cat 0 and Cat 1 form orthonormal (orthogonal to each other with a
      0 & i
      \end{pmatrix}
      \]
+- **Pauli-X Gate (NOT Gate)**: Flips the state of a qubit (|0⟩ to |1⟩ and |1⟩ to |0⟩). This is similar to the NOT gate in classical computers. It is used to invert the state of a qubit.
+  $$
+  X = \begin{pmatrix}
+  0 & 1 \\
+  1 & 0
+  \end{pmatrix}
+  $$
+  - **Details**: The Pauli-X gate is a fundamental quantum gate that performs a bit-flip operation. It is analogous to the classical NOT gate, which inverts the binary state. In quantum computing, applying the Pauli-X gate to a qubit in state |0⟩ will change it to |1⟩, and vice versa.
+
+- **Pauli-Y Gate**: Similar to the X gate but introduces a phase shift. It combines a bit flip with a phase flip.
+  $$
+  Y = \begin{pmatrix}
+  0 & -i \\
+  i & 0
+  \end{pmatrix}
+  $$
+  - **Details**: The Pauli-Y gate is another fundamental quantum gate that not only flips the state of the qubit but also introduces a complex phase factor. This gate is particularly useful in certain quantum algorithms where both bit and phase flips are required.
+
+- **Pauli-Z Gate**: Introduces a phase shift to the |1⟩ state. It leaves the |0⟩ state unchanged and flips the sign of the |1⟩ state.
+  $$
+  Z = \begin{pmatrix}
+  1 & 0 \\
+  0 & -1
+  \end{pmatrix}
+  $$
+  - **Details**: The Pauli-Z gate is used to apply a phase shift to the qubit. It leaves the |0⟩ state unchanged but multiplies the |1⟩ state by -1. This gate is essential in quantum algorithms that require phase manipulation.
+
+- **CNOT Gate (Controlled-NOT Gate)**: A two-qubit gate that flips the second qubit (target) if the first qubit (control) is |1⟩. It is essential for creating entanglement between qubits.
+  $$
+  \text{CNOT} = \begin{pmatrix}
+  1 & 0 & 0 & 0 \\
+  0 & 1 & 0 & 0 \\
+  0 & 0 & 0 & 1 \\
+  0 & 0 & 1 & 0
+  \end{pmatrix}
+  $$
+  - **Details**: The CNOT gate is a crucial two-qubit gate in quantum computing. It performs a NOT operation on the target qubit only when the control qubit is in the state |1⟩. This gate is fundamental for creating entangled states, which are a key resource in many quantum algorithms and protocols.
+
+- **Phase Gate**: Introduces a phase shift to the qubit. It is used to change the relative phase between the |0⟩ and |1⟩ states.
+  $$
+  S = \begin{pmatrix}
+  1 & 0 \\
+  0 & i
+  \end{pmatrix}
+  $$
+  - **Details**: The Phase gate (often denoted as S) applies a phase shift to the qubit. It multiplies the |1⟩ state by the imaginary unit \(i\), leaving the |0⟩ state unchanged. This gate is useful in various quantum algorithms where precise phase control is required.
