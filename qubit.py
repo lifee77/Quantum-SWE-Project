@@ -1,46 +1,43 @@
-from qiskit import QuantumCircuit, Aer, execute
-from qiskit.visualization import plot_bloch_multivector, plot_histogram
-import matplotlib.pyplot as plt
+import numpy as np
 
-# Create a Quantum Circuit with 1 qubit
-qc = QuantumCircuit(1)
+class Qubit:
+    def __init__(self, state=0):
+        self.state = state  # 0 for |0⟩, 1 for |1⟩
 
-# Initial state of the qubit (|0⟩)
-print("Initial state of the qubit:")
-qc.draw(output='mpl')
-plt.show()
+    def __repr__(self):
+        return f'|{self.state}⟩'
 
-# Apply Hadamard gate to create a state of superposition
-qc.h(0)
-print("State of superposition:")
-qc.draw(output='mpl')
-plt.show()
+class SuperpositionQubit:
+    def __init__(self, alpha=1/np.sqrt(2), beta=1/np.sqrt(2)):
+        # alpha and beta are probability amplitudes
+        self.alpha = alpha  # coefficient for |0⟩
+        self.beta = beta    # coefficient for |1⟩
 
-# Simulate the circuit
-backend = Aer.get_backend('statevector_simulator')
-result = execute(qc, backend).result()
-statevector = result.get_statevector()
+    def __repr__(self):
+        return f'{self.alpha}|0⟩ + {self.beta}|1⟩'
 
-# Plot the state on the Bloch sphere
-plot_bloch_multivector(statevector)
-plt.show()
+class EntangledQubits:
+    def __init__(self):
+        # Create two qubits that are entangled
+        self.q1 = SuperpositionQubit()
+        self.q2 = SuperpositionQubit()
 
-# Create a Quantum Circuit with 2 qubits for entanglement
-qc_entangle = QuantumCircuit(2)
+    def entangle(self):
+        # Simple conceptual entanglement: When one qubit is |0⟩, the other is |0⟩, and same for |1⟩
+        entangled_state = f'|00⟩ + |11⟩'
+        return entangled_state
 
-# Apply Hadamard gate to the first qubit
-qc_entangle.h(0)
+    def __repr__(self):
+        return self.entangle()
 
-# Apply CNOT gate to entangle the qubits
-qc_entangle.cx(0, 1)
-print("State of entanglement:")
-qc_entangle.draw(output='mpl')
-plt.show()
+# Creating a single qubit
+qubit = Qubit(0)
+print("Qubit:", qubit)
 
-# Simulate the entangled circuit
-result_entangle = execute(qc_entangle, backend).result()
-statevector_entangle = result_entangle.get_statevector()
+# Creating a qubit in superposition
+superposition_qubit = SuperpositionQubit()
+print("Superposition Qubit:", superposition_qubit)
 
-# Plot the entangled state on the Bloch sphere
-plot_bloch_multivector(statevector_entangle)
-plt.show()
+# Creating two entangled qubits
+entangled_qubits = EntangledQubits()
+print("Entangled Qubits:", entangled_qubits)

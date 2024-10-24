@@ -14,6 +14,8 @@ A quantum superposition can be described as *both 0 and 1, or as all the possibl
 It is the state of a qubit formed by the linear combination of the two regular states<br>
 alpha * 0 + beta*1 <br>
 The two states Cat 0 and Cat 1 form orthonormal (orthogonal to each other with a magnitude of 1 as seen in the image above) bases for the vector space (of Superposition).
+*Matrix Representation of Qubits*: <br>
+      ![Matrix Representation of Qubits](image-2.png)
 
 1. **Hadamard Gate**:
    - The Hadamard gate (H gate) is a single-qubit gate that creates a superposition state from a basis state. It transforms the basis states |0⟩ and |1⟩ into an equal superposition of both states.
@@ -41,44 +43,7 @@ The two states Cat 0 and Cat 1 form orthonormal (orthogonal to each other with a
      \]
 
 4. **Other Quantum Gates for Basic Tasks**:
-   - **Pauli-X Gate (NOT Gate)**: Flips the state of a qubit (|0⟩ to |1⟩ and |1⟩ to |0⟩).
-   This is similar to the NOT gate in classical computers.
-     \[
-     X = \begin{pmatrix}
-     0 & 1 \\
-     1 & 0
-     \end{pmatrix}
-     \]
-   - **Pauli-Y Gate**: Similar to the X gate but introduces a phase shift.
-     \[
-     Y = \begin{pmatrix}
-     0 & -i \\
-     i & 0
-     \end{pmatrix}
-     \]
-   - **Pauli-Z Gate**: Introduces a phase shift to the |1⟩ state.
-     \[
-     Z = \begin{pmatrix}
-     1 & 0 \\
-     0 & -1
-     \end{pmatrix}
-     \]
-   - **CNOT Gate (Controlled-NOT Gate)**: A two-qubit gate that flips the second qubit (target) if the first qubit (control) is |1⟩.
-     \[
-     \text{CNOT} = \begin{pmatrix}
-     1 & 0 & 0 & 0 \\
-     0 & 1 & 0 & 0 \\
-     0 & 0 & 0 & 1 \\
-     0 & 0 & 1 & 0
-     \end{pmatrix}
-     \]
-   - **Phase Gate**: Introduces a phase shift to the qubit.
-     \[
-     S = \begin{pmatrix}
-     1 & 0 \\
-     0 & i
-     \end{pmatrix}
-     \]
+![Alt text](image.png)
 - **Pauli-X Gate (NOT Gate)**: Flips the state of a qubit (|0⟩ to |1⟩ and |1⟩ to |0⟩). This is similar to the NOT gate in classical computers. It is used to invert the state of a qubit.
   $$
   X = \begin{pmatrix}
