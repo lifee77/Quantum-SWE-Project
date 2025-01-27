@@ -1,22 +1,33 @@
 import numpy as np
 import random
 
-def initialize_system(n):
+def initialize_system(adjacency_matrix, initial_states):
     """
-    Initializes the system with n nodes, all starting in state 0 (functioning).
+    Initializes the system with a given adjacency matrix and initial states.
 
     Args:
-        n: The number of nodes in the system.
+        adjacency_matrix: The adjacency matrix (NumPy array).
+        initial_states: The initial states of the nodes (NumPy array).
 
     Returns:
         A tuple containing:
-        - states: A NumPy array representing the initial states of the nodes.
-        - adjacency_matrix: A randomly generated n x n adjacency matrix.
+        - states: The initial states of the nodes.
+        - adjacency_matrix: The adjacency matrix.
     """
-    states = np.zeros(n)  # All nodes start in state 0
-    adjacency_matrix = np.random.rand(n, n)  # Random probabilities between 0 and 1
-    np.fill_diagonal(adjacency_matrix, 1)  # Ensure a_ii = 1
-    return states, adjacency_matrix
+
+    # Basic checks on input
+    if adjacency_matrix.shape[0] != adjacency_matrix.shape[1]:
+        raise ValueError("Adjacency matrix must be square")
+    if adjacency_matrix.shape[0] != len(initial_states):
+        raise ValueError("Adjacency matrix dimensions must match the number of states")
+    if not np.all((adjacency_matrix >= 0) & (adjacency_matrix <= 1)):
+        raise ValueError("Adjacency matrix elements must be between 0 and 1")
+    if not np.all(np.diag(adjacency_matrix) == 1):
+        raise ValueError("Adjacency matrix diagonal elements must be 1")
+    if not np.all((initial_states == 0) | (initial_states == 1)):
+        raise ValueError("Initial states must be either 0 or 1")
+
+    return initial_states, adjacency_matrix
 
 def update_node_state(i, states, adjacency_matrix):
     """
@@ -61,23 +72,19 @@ def simulate_time_step(states, adjacency_matrix):
         new_states[i] = update_node_state(i, states, adjacency_matrix)
     return new_states
 
-def simulate_system(n, num_time_steps, initial_failures=None):
+def simulate_system(adjacency_matrix, initial_states, num_time_steps):
     """
     Simulates the system for a given number of time steps.
 
     Args:
-        n: The number of nodes in the system.
+        adjacency_matrix: The adjacency matrix (NumPy array).
+        initial_states: The initial states of the nodes (NumPy array).
         num_time_steps: The number of time steps to simulate.
-        initial_failures: A list of node indices to initially set as failed (optional).
 
     Returns:
         A list of NumPy arrays, where each array represents the states of the nodes at each time step.
     """
-    states, adjacency_matrix = initialize_system(n)
-
-    if initial_failures:
-        for node_index in initial_failures:
-            states[node_index] = 1
+    states, adjacency_matrix = initialize_system(adjacency_matrix, initial_states)
 
     history = [states.copy()]  # Record the initial state
 
@@ -87,15 +94,22 @@ def simulate_system(n, num_time_steps, initial_failures=None):
 
     return history, adjacency_matrix
 
-# Example usage with a 3x3 adjacency matrix:
+# Example usage:
 num_nodes = 3
 time_steps = 10
 
-# Simulate with no initial failures:
-history, adjacency_matrix = simulate_system(num_nodes, time_steps)
+# Define a custom adjacency matrix
+adjacency_matrix = np.array([
+    [1.0, 0.9, 0.8],
+    [0.7, 1.0, 0.6],
+    [0.9, 0.85, 1.0]
+])
 
-# Simulate with initial failures in nodes 0 and 2:
-# history, adjacency_matrix = simulate_system(num_nodes, time_steps, initial_failures=[0, 2])
+# Define initial states (e.g., node 0 failed, others functioning)
+initial_states = np.array([1, 0, 0])
+
+# Simulate the system
+history, adjacency_matrix = simulate_system(adjacency_matrix, initial_states, time_steps)
 
 print("Adjacency Matrix:")
 print(adjacency_matrix)

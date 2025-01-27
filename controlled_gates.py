@@ -16,9 +16,3 @@ def append_conditional_gates(adjacency_matrix,quantum_circuit):
             quantum_circuit.append(gate_if_1.control(1), [j,i])
             #quantum_circuit.append(gate_if_0.control(0), [j,i])
             #would be basically not doing anything, so we leave it
-
-
-
-
-    
-
