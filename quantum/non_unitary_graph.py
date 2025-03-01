@@ -8,7 +8,7 @@ from qiskit.quantum_info import Statevector
 import matplotlib.pyplot as plt
 
 # --- Utility Functions ---
-
+s_values = []
 def kronecker_product(matrices):
     """Compute the Kronecker product of a list of matrices."""
     result = np.eye(1)
@@ -24,6 +24,7 @@ def insert_non_unitary(matrix):
     U_, Sigma, Vh = svd(matrix)
     s2 = np.max(Sigma**2)
     s = 1 / np.sqrt(s2)
+    s_values.append(s)
     Sigma_tilde = np.sqrt(np.maximum(0, 1 - s**2 * Sigma**2))
     C = U_ @ np.diag(Sigma_tilde) @ Vh
 
@@ -86,13 +87,30 @@ num_qubits = 2  # main qubits
 shots = 1024
 
 # Sweep parameter a from 0.2 to 1.
-a_values = np.linspace(0.2, 1, 100)
+a_values = np.linspace(0.2, 1, 20)
 measured_failure = np.zeros(len(a_values))
+test_measurement = np.zeros(len(a_values))
 sv_failure = np.zeros(len(a_values))  # statevector failure probability
 
 # Also, record full counts (diagnostics) for a few values.
 diagnostic_a = [0.2, 0.5, 0.8, 1.0]
 diagnostic_results = {}
+
+# Initialize with other initial states for main qubits
+
+initial_states = [[0,1],[1,0]] 
+# This one works very well, but the s**2 underestimates it
+
+#initial_states = [[np.sqrt(0.1),np.sqrt(0.9)],[1,0]]  
+# This one is underestinated by both, but
+# it is an issue of the expected failure, not so much of the plot
+
+#initial_states = [[np.sqrt(0.1),np.sqrt(0.9)],[np.sqrt(0.9),np.sqrt(0.1)]] 
+# The plot is the worst with this one
+
+#initial_states = [[1,0],[np.sqrt(0.9),np.sqrt(0.1)]] 
+# This one is underestimated by both corrections
+# but is the most underestimated by the 1/(np.sqrt(a) -1 ) correction
 
 for idx, a in enumerate(a_values):
     # Define the 2x2 identity and projectors.
@@ -116,7 +134,7 @@ for idx, a in enumerate(a_values):
     # To activate the U branch, set:
     # - main qubit 0 (control) to |1> => [0, 1]
     # - main qubit 1 (target)  to |0> => [1, 0]
-    qc = quantum_circuit(num_qubits, CU, [0, 1], [1, 0], add_measurements=True)
+    qc = quantum_circuit(num_qubits, CU, initial_states[0], initial_states[1], add_measurements=True)
     
     # Run QASM simulation.
     counts = simulate_qc(qc, shots=shots)
@@ -130,9 +148,15 @@ for idx, a in enumerate(a_values):
         measured_failure[idx] = counts[key] / shots
     else:
         measured_failure[idx] = 0
+
+    key = "0 10"
+    if key in counts:
+        measured_failure[idx] += counts[key] / shots
+        test_measurement[idx] = counts[key] / shots
+
     
     # Run statevector simulation for every a.
-    qc_no_meas = quantum_circuit(num_qubits, CU, [0, 1], [1, 0], add_measurements=False)
+    qc_no_meas = quantum_circuit(num_qubits, CU, initial_states[0], initial_states[1], add_measurements=False)
     sv_probs = simulate_statevector(qc_no_meas)
     # In the statevector dictionary, keys appear without spaces.
     # We assume that "0 11" corresponds to "011": ancilla=0, main=11.
@@ -147,12 +171,16 @@ for idx, a in enumerate(a_values):
         diagnostic_results[a] = sv_probs
 
 # --- Plotting the Results ---
+
+
 plt.figure(figsize=(10,6))
 expected_failure = a_values / (1 + np.sqrt(a_values))
-plt.plot(a_values, expected_failure, 'k--', label='Expected Failure (a/(1+sqrt(a)))', alpha = 1)
+#s_vals = 1/(np.sqrt(a_values)+1) # The correction is exactly the same :D
+plt.plot(a_values, expected_failure, 'k--', label='Expected Failure (a/(1+sqrt(a)))', alpha = 1, color ='blue')
 plt.plot(a_values, measured_failure, 'o-', label='Measured Failure (QASM)', alpha= 0.5)
+plt.plot(a_values, measured_failure/np.array(s_values[:20])**2, 'o-', label = 'Corrected Measured Failure', alpha = 0.5, color = 'green')
 plt.plot(a_values, sv_failure, 's-', label='Failure from Statevector', alpha = 0.5)
-plt.plot(a_values, a_values, 'k--', label='Expected Failure (a)')
+plt.plot(a_values, a_values, 'k--', label='Expected Failure (a)', color = 'green')
 plt.xlabel('a')
 plt.ylabel('Failure Probability (branch "0 11")')
 plt.legend()
@@ -177,6 +205,6 @@ for a_val, probs in diagnostic_results.items():
     print(f"a = {a_val:.3f} -> Statevector probabilities: {probs}")
     
 print("\nComparison for Selected a Values:")
-for test_index in [0, 25, 50, 75, 99]:
+for test_index in np.arange(0,len(a_values),len(a_values)//5):
     print(f"a = {a_values[test_index]:.3f} -> QASM Failure = {measured_failure[test_index]:.4f}, "
           f"SV Failure = {sv_failure[test_index]:.4f}, Expected = {a_values[test_index]:.4f}")
