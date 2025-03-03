@@ -112,6 +112,8 @@ initial_states = [[0,1],[1,0]]
 # This one is underestimated by both corrections
 # but is the most underestimated by the 1/(np.sqrt(a) -1 ) correction
 
+#initial_states = [[1,0], [1/np.sqrt(2), 1/np.sqrt(2)]]
+
 for idx, a in enumerate(a_values):
     # Define the 2x2 identity and projectors.
     I = np.eye(2)
@@ -174,13 +176,23 @@ for idx, a in enumerate(a_values):
 
 
 plt.figure(figsize=(10,6))
-expected_failure = a_values / (1 + np.sqrt(a_values))
-#s_vals = 1/(np.sqrt(a_values)+1) # The correction is exactly the same :D
-plt.plot(a_values, expected_failure, 'k--', label='Expected Failure (a/(1+sqrt(a)))', alpha = 1, color ='blue')
+
+#expected_failure = a_values / (1 + np.sqrt(a_values))
+# Another computation for the expected failure from the initial states
+
+success = np.sqrt(1-a_values) * initial_states[1][0]
+failure = np.sqrt(a_values) * initial_states[1][0] + initial_states[1][1]
+
+norm_term = success**2 + failure**2
+expected_failure = failure**2 / norm_term
+
+#expected_failure = 1 - (1-a_values)*(initial_states[1][0]**2)
+print("Expected Failure")
+plt.plot(a_values, expected_failure / (1 + np.sqrt(a_values)), 'k--', label='Expected Failure (a/(1+sqrt(a)))', alpha = 1, color ='blue')
 plt.plot(a_values, measured_failure, 'o-', label='Measured Failure (QASM)', alpha= 0.5)
-plt.plot(a_values, measured_failure/np.array(s_values[:20])**2, 'o-', label = 'Corrected Measured Failure', alpha = 0.5, color = 'green')
+plt.plot(a_values, measured_failure * (1+np.sqrt(a_values)), 'o-', label = 'Corrected Measured Failure', alpha = 0.5, color = 'green')
 plt.plot(a_values, sv_failure, 's-', label='Failure from Statevector', alpha = 0.5)
-plt.plot(a_values, a_values, 'k--', label='Expected Failure (a)', color = 'green')
+plt.plot(a_values, expected_failure, 'k--', label='Expected Failure (a)', color = 'green')
 plt.xlabel('a')
 plt.ylabel('Failure Probability (branch "0 11")')
 plt.legend()
