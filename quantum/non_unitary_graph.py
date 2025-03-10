@@ -98,7 +98,7 @@ diagnostic_results = {}
 
 # Initialize with other initial states for main qubits
 
-initial_states = [[0,1],[1,0]] 
+#initial_states = [[0,1],[1,0]] 
 # This one works very well, but the s**2 underestimates it
 
 #initial_states = [[np.sqrt(0.1),np.sqrt(0.9)],[1,0]]  
@@ -108,7 +108,7 @@ initial_states = [[0,1],[1,0]]
 #initial_states = [[np.sqrt(0.1),np.sqrt(0.9)],[np.sqrt(0.9),np.sqrt(0.1)]] 
 # The plot is the worst with this one
 
-#initial_states = [[1,0],[np.sqrt(0.9),np.sqrt(0.1)]] 
+initial_states = [[1,0],[np.sqrt(0.9),np.sqrt(0.1)]] 
 # This one is underestimated by both corrections
 # but is the most underestimated by the 1/(np.sqrt(a) -1 ) correction
 
@@ -183,8 +183,20 @@ plt.figure(figsize=(10,6))
 success = np.sqrt(1-a_values) * initial_states[1][0]
 failure = np.sqrt(a_values) * initial_states[1][0] + initial_states[1][1]
 
-norm_term = success**2 + failure**2
-expected_failure = failure**2 / norm_term
+# control qubit amplitudes
+p,q = initial_states[0][0], initial_states[0][1]
+print(f"Control = ({p})*|0> + ({q})*|1>")
+# target qubit amplitudes
+x,y = initial_states[1][0], initial_states[1][1]
+print(f"Target = ({x})*|0> + ({y})*|1>")
+
+
+# Non-allowed amplitudes
+left = p**2 * x**2 +  q**2 * x**2 * (1-a_values) # |<0|psi>|**2 desired
+right = p**2 * y**2 + q**2 * (a_values) # |<1|psi>|**2 desired
+
+norm_term = left + right
+expected_failure = right / norm_term
 
 #expected_failure = 1 - (1-a_values)*(initial_states[1][0]**2)
 print("Expected Failure")
