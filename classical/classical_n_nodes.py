@@ -93,24 +93,28 @@ def simulate_system(adjacency_matrix, initial_states, num_time_steps, seed=None)
 
     return history, adjacency_matrix
 
-# --- Example 1: Using n = 10 Nodes ---
+# --- Example 1: Using n = 10 Nodes with Diagonal and Sub-diagonal Matrix ---
 
 def example_n_10():
     n = 10
     time_steps = 10
 
-    # Generate a random adjacency matrix for n nodes.
-    # Off-diagonals are random values between 0 and 1.
-    adjacency_matrix = np.random.rand(n, n)
-    np.fill_diagonal(adjacency_matrix, 1.0)  # Ensure the diagonal is 1.
+    # Create an identity matrix for n nodes
+    adjacency_matrix = np.eye(n)
+    
+    # Add a diagonal of 1s below the main diagonal
+    # This creates a structure where each node affects itself and the node after it
+    for i in range(n-1):
+        adjacency_matrix[i+1, i] = 1
 
-    # Create random initial states for n nodes (e.g., 20% chance of being failed)
-    initial_states = np.random.choice([0, 1], size=n, p=[0.8, 0.2])
+    # Create initial states with only the first node failed
+    initial_states = np.zeros(n, dtype=np.int8)
+    initial_states[0] = 1  # First node is failed (state 1)
 
     # Simulate the system
     history, adj_matrix = simulate_system(adjacency_matrix, initial_states, time_steps, seed=42)
 
-    print("Example with n = 10 Nodes:")
+    print("Example with n = 10 Nodes (Diagonal and Sub-diagonal Matrix):")
     print("Adjacency Matrix:")
     print(adj_matrix)
     print("\nInitial States:")
@@ -120,30 +124,35 @@ def example_n_10():
         print(f"Time step {i}: {states}")
     print("\n" + "="*50 + "\n")
 
-# --- Example 2: Using n = 50 Nodes ---
+# --- Example 2: Using n = 50 Nodes with Diagonal and Sub-diagonal Matrix ---
 
 def example_n_50():
     n = 50
     time_steps = 15
 
-    # Generate a random adjacency matrix for n nodes.
-    adjacency_matrix = np.random.rand(n, n)
-    np.fill_diagonal(adjacency_matrix, 1.0)  # Diagonal must be 1.
+    # Create an identity matrix for n nodes
+    adjacency_matrix = np.eye(n)
+    
+    # Add a diagonal of 1s below the main diagonal
+    # This creates a structure where each node affects itself and the node after it
+    for i in range(n-1):
+        adjacency_matrix[i+1, i] = 1
 
-    # Create random initial states for n nodes (e.g., 10% chance of being failed)
-    initial_states = np.random.choice([0, 1], size=n, p=[0.9, 0.1])
+    # Create initial states with only the first node failed
+    initial_states = np.zeros(n, dtype=np.int8)
+    initial_states[0] = 1  # First node is failed (state 1)
 
     # Simulate the system
     history, adj_matrix = simulate_system(adjacency_matrix, initial_states, time_steps, seed=123)
 
-    print("Example with n = 50 Nodes:")
+    print("Example with n = 50 Nodes (Diagonal and Sub-diagonal Matrix):")
     print("Adjacency Matrix (showing first 5 rows):")
-    print(adj_matrix[:5])  # For brevity, print only the first 5 rows
-    print("\nInitial States:")
-    print(initial_states)
+    print(adj_matrix[:5, :5])  # For brevity, print only a 5x5 section
+    print("\nInitial States (first 15 nodes):")
+    print(initial_states[:15])  # Show only the first 15 nodes to see the pattern
     print("\nSystem State History:")
     for i, states in enumerate(history):
-        print(f"Time step {i}: {states}")
+        print(f"Time step {i}: {states[:15]}...")  # Show only the first 15 nodes for brevity
     print("\n" + "="*50 + "\n")
 
 if __name__ == "__main__":
