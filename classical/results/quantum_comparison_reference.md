@@ -20,10 +20,15 @@ Initial State: `[1, 0]` (Node 0 starts failed)
 - Node 1 affects Node 0 with 70% probability (Matrix[1,0] = 0.7)
 - Diagonal elements (1.0) indicate that a failed node stays failed
 
-#### Expected Results:
-- Almost all runs end in state "11" (both nodes failed)
-- A small percentage of runs end in state "10"
-- The probability of state "11" is approximately 99%
+#### Expected Results (1 time step):
+- With a single time step, state "10" should appear in approximately 70% of runs
+- State "11" should appear in approximately 30% of runs
+- This directly demonstrates the effect of Matrix[0,1] = 0.3, which is the probability of node 1 failing due to node 0
+
+#### Expected Results (5 time steps):
+- Over multiple time steps, the probability of reaching state "11" increases
+- With 5 time steps, almost all runs (>99%) end in state "11" (both nodes failed)
+- This shows the cumulative effect of failure probability over time
 
 
 ### 5-NODE SYSTEM:
