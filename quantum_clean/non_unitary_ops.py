@@ -135,14 +135,14 @@ def build_qc(a, psi0, psi1):
     qc.initialize(psi1, qreg_main[1])  
 
     # Construct the non-unitary 2x2 operator
-    #M_ij = get_non_unitary(a)
+    M_ij = get_non_unitary(a)
     
     # Embed into 3-qubit unitary
-    #big_unitary = embed_non_unitary(M_ij)
-    #gate = UnitaryGate(big_unitary, label="M'_ij")
+    big_unitary = embed_non_unitary(M_ij)
+    gate = UnitaryGate(big_unitary, label="M'_ij")
 
     # Append to the circuit on qubits [0,1,2]
-    #qc.append(gate, [0, 1, 2])
+    qc.append(gate, [0, 1, 2])
 
     # Measure qubit0 -> cbit0, qubit1-> cbit1, anc-> cbit2
     qc.measure(qreg_anc,     2)
