@@ -65,7 +65,7 @@ for label, (psi0, psi1) in initial_states.items():
         s_probs.append( p * (np.sqrt(a) + 1) ) 
 
         # theoretical 
-        t_probs.append(nu_ops.expected_failure(a, psi0, psi1))
+        t_probs.append(nu_ops.expected_failure(a, psi1, psi0))
     # title = str(psi0) + str(psi1)
     # plt.title(title)
     # plt.bar(counts.keys(), counts.values())

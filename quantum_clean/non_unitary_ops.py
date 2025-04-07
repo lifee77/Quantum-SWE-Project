@@ -108,7 +108,7 @@ def expected_failure(a, j_init, i_init):
     norm = np.sum(np.abs(final_state)**2)
 
     #return (p_01 + p_11) / norm
-    return p_01 + p_11/ norm # no need to normalize?
+    return (p_01 + p_11)/ norm # no need to normalize?
 
 def build_qc(a, psi0, psi1):
     """
