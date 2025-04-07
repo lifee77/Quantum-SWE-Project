@@ -38,7 +38,7 @@ init_plus_plus = (
 
 # Put them in a dictionary for easy looping/plotting:
 initial_states = {
-    "|0,1>": init_10,
+    "|1,0>": init_10,
     "|1,1>": init_11,
     "|0,+_0>": init_plus0,
     "|+_1,+_0>": init_plus_plus
