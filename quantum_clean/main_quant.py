@@ -2,9 +2,9 @@
 Module main_quant.py
 
 Centralizes the operations from other modules. Makes the experiments
-and commpares them with the expected results from the operations. 
+and compares them with the expected results from the operations. 
 Makes histograms and plots the results. Some initial superpositions are
-displayed here
+displayed here.
 """
 import numpy as np
 import matplotlib.pyplot as plt
@@ -12,11 +12,67 @@ from qiskit import QuantumCircuit, QuantumRegister, ClassicalRegister, transpile
 from qiskit_aer import Aer
 from scipy.linalg import svd, qr
 from qiskit.circuit.library import UnitaryGate
-#from run_quantum_circuit import run_circuit
 import run_quantum_circuit as run_qc
 import non_unitary_ops as nu_ops
 from qiskit.visualization import plot_histogram
 
+def run_circuit(a, psi0, psi1, shots=2000):
+    """
+    Build a circuit for the 2-main-qubits + 1-ancilla scenario:
+      - main[0] = control qubit, initialized to psi0
+      - main[1] = target qubit, initialized to psi1
+      - anc in |0>
+      - non-unitary M_ij depends on 'a'
+    Return the probability that qubit-1 is measured = |1>.
+    """
+    # Create quantum and classical registers
+    qreg_main = QuantumRegister(2, 'main')
+    qreg_anc = QuantumRegister(1, 'anc')
+    creg = ClassicalRegister(3, 'c')  # measure 3 qubits
+    qc = QuantumCircuit(qreg_main, qreg_anc, creg)
+
+    # Initialize qubits
+    qc.initialize(psi0, qreg_main[0])  
+    qc.initialize(psi1, qreg_main[1])  
+
+    # Construct the 2x2 operator
+    U_ij = np.array([
+        [np.sqrt(1 - a), 0],
+        [np.sqrt(a),     1]
+    ], dtype=complex)
+
+    # Create the controlled-operation matrix
+    I2 = np.eye(2, dtype=complex)
+    P0 = np.array([[1,0],[0,0]], dtype=complex)
+    P1 = np.array([[0,0],[0,1]], dtype=complex)
+    M_ij = np.kron(I2, P0) + np.kron(U_ij, P1)
+
+    # Embed into 3-qubit unitary
+    big_unitary = nu_ops.embed_non_unitary(M_ij)
+    gate = UnitaryGate(big_unitary, label="M'_ij")
+
+    # Append to the circuit on qubits [0,1,2]
+    qc.append(gate, [0, 1, 2])
+
+    # Measure all qubits
+    qc.measure(qreg_anc, 2)
+    qc.measure(qreg_main[0], 0)
+    qc.measure(qreg_main[1], 1)
+
+    # Run simulation
+    backend = Aer.get_backend('qasm_simulator')
+    compiled = transpile(qc, backend)
+    job = backend.run(compiled, shots=shots)
+    result = job.result()
+    counts = result.get_counts()
+
+    # Probability that qubit1 = |1> AND ancilla = |0>
+    p_q1_1 = sum(c for key, c in counts.items() if key[1] == '1' and key[0] == '0')/shots
+    return p_q1_1
+
+# Set up the initial states
+# "qubit0" = control, "qubit1" = target
+# Each qubit is a 2D vector [amp|0>, amp|1>]
 
 # 1) qubit0=|1>, qubit1=|0>
 init_10 = (np.array([0, 1], dtype=complex),  # qubit0
@@ -40,37 +96,33 @@ init_plus_plus = (
 initial_states = {
     "|1,0>": init_10,
     "|1,1>": init_11,
-    "|0,+_0>": init_plus0,
-    "|+_1,+_0>": init_plus_plus
+    "|+,0>": init_plus0,
+    "|+,+>": init_plus_plus
 }
 
 # AER Simulations and Expected
-
 a_values = np.linspace(0, 1, 11)
 results = {}  # store p(q1=1) for each state vs. a
 scaled_results = {}
 theoretical_results = {}
 shots = 2000
-backend = Aer.get_backend('qasm_simulator')
 
 for label, (psi0, psi1) in initial_states.items():
     probs = []
     s_probs = []
     t_probs = []
     for a in a_values:
-        p = run_qc.measure_failure(a,psi0, psi1, backend, shots=shots)
+        # Get measurement results
+        p = run_circuit(a, psi0, psi1, shots=shots)
         probs.append(p)
-
-        #scaled
-        s_probs.append( p * (np.sqrt(a) + 1) ) 
-
-        # theoretical 
-        t_probs.append(nu_ops.expected_failure(a, psi1, psi0))
-    # title = str(psi0) + str(psi1)
-    # plt.title(title)
-    # plt.bar(counts.keys(), counts.values())
-    # plt.title(psi0, psi1)
-    # plt.show();
+        
+        # Apply scaling factor
+        scaling_factor = nu_ops.get_rescaling_factor(a)
+        s_probs.append(p * scaling_factor)
+        
+        # Calculate theoretical expectation
+        t_probs.append(nu_ops.expected_failure(a, psi0, psi1))
+    
     results[label] = probs
     scaled_results[label] = s_probs
     theoretical_results[label] = t_probs
@@ -80,8 +132,6 @@ fig, (ax1, ax2) = plt.subplots(nrows=1, ncols=2, figsize=(12, 5), sharex=True)
 
 # (A) Left subplot: Measured Probability
 # --------------------------------------------------------------
-# We'll allow Matplotlib to pick colors from the default color cycle.
-# For consistency, let’s store the colors in a list so we can re-use them in the second subplot.
 color_cycle = plt.rcParams["axes.prop_cycle"].by_key()["color"]
 labels_list = list(initial_states.keys())  # So we can index them
 
@@ -129,6 +179,5 @@ ax2.grid(True)
 plt.tight_layout()
 plt.show()
 
-print(theoretical_results["|1,0>"])
-
-# Quantum Backend running the circuit
+# Print theoretical values for |1,0>
+print("Theoretical failure probabilities for |1,0>:", theoretical_results["|1,0>"])
