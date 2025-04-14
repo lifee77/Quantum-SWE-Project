@@ -129,6 +129,37 @@ ax2.grid(True)
 plt.tight_layout()
 plt.show()
 
-print(theoretical_results["|1,0>"])
-
 # Quantum Backend running the circuit
+
+init_10 = (np.array([0, 1], dtype=complex),  # qubit0
+           np.array([1, 0], dtype=complex))  # qubit1
+
+psi0 = init_10[0]
+psi1 = init_10[1]
+
+a_interest = 0.7
+shots = 1024
+backend = Aer.get_backend('qasm_simulator')
+
+qc = nu_ops.build_qc(a_interest, psi0, psi1)
+
+qc.draw('mpl')
+plt.show();
+
+# Run the circuit
+
+percentages, filtered_results = run_qc.measure_failure(a_interest, psi0, psi1, backend, shots=1024, filtered = True)
+
+# Rescale the results
+
+total = sum(filtered_results.values())
+
+for key, value in filtered_results.items():
+    filtered_results[key] = value * (np.sqrt(a_interest+1))
+
+rescaled_total = sum(filtered_results.values())
+
+print(f"Re-scaled Failure Probability: {round(filtered_results['11'] / rescaled_total,4)}" )
+
+run_qc.create_state_histogram(filtered_results, 2, output_dir="quantum_clean/results/")
+plt.show();

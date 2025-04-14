@@ -46,7 +46,8 @@ def get_non_unitary(a):
     I2 = np.eye(2, dtype=complex)
     P0 = np.array([[1,0],[0,0]], dtype=complex)
     P1 = np.array([[0,0],[0,1]], dtype=complex)
-    return np.kron(P0,I2) + np.kron(P1,U_ij)
+    #return np.kron(P0,I2) + np.kron(P1,U_ij)
+    return np.kron(I2,P0)  + np.kron(U_ij,P1)
 
 def embed_non_unitary(matrix):
     """
